@@ -1,6 +1,8 @@
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import load_model
 import numpy as np
+import os
+from django.conf import settings
 
 img_size = 224
 classes = np.array(['beef_noodles', 'braised_pork_rice', 'bubble_tea', 'curry_rice', 'steak'])
@@ -11,7 +13,8 @@ def classifyFood(food_img):
     img = image.img_to_array(img) / 255.0
     img = np.expand_dims(img, axis = 0)
 
-    model = load_model('food_model.keras')
+    model_path = os.path.join(settings.BASE_DIR, 'food_model.keras')
+    model = load_model(model_path)
 
     pred = model.predict(img)
     
