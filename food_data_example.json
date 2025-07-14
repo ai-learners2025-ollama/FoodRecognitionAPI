@@ -1,0 +1,17 @@
+{
+    "beef_noodles": {
+        "name": "牛肉麵",
+        "food_id": 0,
+        "nutritional": [
+            "牛肋條",
+            "油麵條"
+        ]
+    },
+    "steak": {
+        "name": "牛排",
+        "food_id": 1,
+        "nutritional": [
+            "牛小排平均值"
+        ]
+    }
+}
