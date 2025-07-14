@@ -6,6 +6,6 @@ def test(request):
     if request.method == 'GET':
         return render(request, 'pages/test.html')
     else: 
-        img = Image.open(request.POST["image"])
+        img = Image.open(request.FILES.get('image'))
         result = classifyFood(img)
         return render(request, 'pages/test.html', {'result': result})

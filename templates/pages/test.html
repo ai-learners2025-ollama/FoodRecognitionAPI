@@ -4,7 +4,7 @@
     <div class="container p-3">
         <div class="col-lg-6 shadow mx-auto p-5">
             <h1> 上傳照片來看你吃的是什麼吧！ </h1>
-            <form method="post">
+            <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="mb-3">
                     <label>測試照片</label>
