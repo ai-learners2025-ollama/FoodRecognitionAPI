@@ -1,0 +1,45 @@
+{% extends "scaffolds/base.html" %}
+
+{% block content %}
+    <div class="container p-3">
+        <div class="col-lg-6 shadow mx-auto p-5">
+            <h1> 上傳照片來看你吃的是什麼吧！ </h1>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label>測試照片</label>
+                    <input class="form-control" type="file" name="image" accept="image/jpeg">
+                </div>
+                <div class="text-center">
+                    <input class="btn btn-primary btn-lg mt-3" type="submit" value="送出">
+                </div>
+            </form>
+        </div>
+    </div>
+    {% if result %}
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">推論結果</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            {{ result }}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+        </div>
+        </div>
+    </div>
+    {% endif %}
+    <script>
+        {% if result %}
+        window.onload = function(){
+            var myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
+            myModal.show()
+        }
+        {% endif %}
+    </script>
+{% endblock %}

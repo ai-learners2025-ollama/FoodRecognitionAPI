@@ -80,3 +80,10 @@ ls -la /var/log/apache2/
 cat /var/log/apache2/error-djangoBLOG.log
 nano /var/log/apache2/error-djangoBLOG.log
 ```
+
+### 建置model環境
+
+```shell
+pip install tensorflow
+pip install Pillow
+```
