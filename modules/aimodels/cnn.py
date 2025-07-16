@@ -5,7 +5,7 @@ import os
 from django.conf import settings
 
 img_size = 224
-classes = np.array(['beef_noodles', 'braised_pork_rice', 'bubble_tea', 'curry_rice', 'steak'])
+classes = np.array(['beef_noodles', 'bubble_tea', 'curry_rice', 'donut', 'other', 'steak'])
 
 def classifyFood(food_img):
     # img = image.load_img(food_img, target_size=(img_size, img_size))
@@ -21,7 +21,12 @@ def classifyFood(food_img):
     confidence = np.max(pred)
     predicted_class = np.argmax(pred)
 
-    return classes[np.argmax(pred)]
+    result = classes[np.argmax(pred)]
+
+    if result == 'other':
+        return "不在判別的五種食物中"
+    else:
+        return result
 
     # if confidence < 0.5:
     #     return f"模型不太確定這張圖片的內容，最高信心值為：{confidence:.2f}"
