@@ -17,8 +17,18 @@ def classifyFood(food_img):
     model = load_model(model_path)
 
     pred = model.predict(img)
+
+    confidence = np.max(pred)
+    predicted_class = np.argmax(pred)
+
+    return classes[np.argmax(pred)]
+
+    # if confidence < 0.5:
+    #     return f"模型不太確定這張圖片的內容，最高信心值為：{confidence:.2f}"
+    # else:
+    #     return f"預測為類別 {classes[predicted_class]}，信心值為：{confidence:.2f}"
     
     # print("預測結果：", classes[np.argmax(pred)])
-    return classes[np.argmax(pred)]
+    # return classes[np.argmax(pred)]
 
 # print(classifyFood('sss'))

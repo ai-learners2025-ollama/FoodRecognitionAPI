@@ -17,8 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from tests.views import test
+from line_bot.views import callback
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', test),
+    path('line/', callback),
 ]
