@@ -87,3 +87,13 @@ nano /var/log/apache2/error-djangoBLOG.log
 pip install tensorflow
 pip install Pillow
 ```
+
+### 建置資料庫
+
+```shell
+# 建立資料庫
+python manage.py makemigrations
+python manage.py migrate
+# 建立超級使用者
+python manage.py createsuperuser
+```
