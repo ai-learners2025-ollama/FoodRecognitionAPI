@@ -13,8 +13,30 @@
                 <div class="text-center">
                     <input class="btn btn-primary btn-lg mt-3" type="submit" value="送出">
                 </div>
+                <div class="text-center">
+                   {% if result %}
+        <h3>分類結果</h3>
+        <p>{{ result }}</p>
+         {% endif %}
+         {% if food_infos %}
+        <h3>食材營養資訊</h3>
+        <table>
+        <tr><th>食材</th><th>熱量</th><th>蛋白質</th><th>碳水化合物</th></tr>
+        {% for food in food_infos %}
+            <tr>
+            <td>{{ food.name_zh }}</td>
+            <td>{{ food.calories }}</td>
+            <td>{{ food.protein }}</td>
+            <td>{{ food.carbs }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+         {% endif %}
+
+                </div>
             </form>
         </div>
+         
     </div>
     {% if result %}
     <!-- Modal -->
@@ -26,7 +48,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            {{ result }}
+            {{ result }}{{ food_infos }}
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
