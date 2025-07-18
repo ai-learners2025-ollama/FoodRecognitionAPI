@@ -18,7 +18,8 @@ def detect_image(image_input, save_dir: str = "outputs"):
     """
     save_dir = os.path.join(settings.BASE_DIR, save_dir)
     os.makedirs(save_dir, exist_ok=True)
-    model = YOLO('best.pt')
+    yolo_model_path = os.path.join(settings.BASE_DIR, 'best.pt')
+    model = YOLO(yolo_model_path)
 
     # 判斷圖片輸入形式：字串路徑 or PIL.Image
     if isinstance(image_input, str):
