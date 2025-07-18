@@ -5,7 +5,8 @@ import os
 from django.conf import settings
 
 img_size = 224
-classes = np.array(['beef noodles', 'bubble_tea', 'curry_rice', 'donut', 'other', 'steak'])
+# classes = np.array(['beef_noodles', 'bubble_tea', 'curry_rice', 'donut', 'other', 'steak'])
+classes = np.array(['beef noodles', 'bubble_tea', 'curry_rice', 'donut', 'non_food', 'other_food', 'steak'])
 
 def classifyFood(food_img):
     # img = image.load_img(food_img, target_size=(img_size, img_size))
@@ -23,7 +24,7 @@ def classifyFood(food_img):
 
     result = classes[np.argmax(pred)]
 
-    if result == 'other':
+    if result in ['non_food', 'other_food']:
         return "不在判別的五種食物中"
     else:
         return result
