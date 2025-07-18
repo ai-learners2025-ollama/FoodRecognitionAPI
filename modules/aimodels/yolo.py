@@ -51,24 +51,19 @@ def detect_image(image_input, save_dir: str = "outputs"):
 
     return result_img_path, predictions
 
-def query_unique_food_info(food, predictions):
+def query_food_infos(food, predictions):
     """
-    根據 YOLO 辨識結果查詢資料庫，將主分類食材優先放前，並去除重複。
-
-    參數:
-        food (str): 主分類模型預測結果（如 'Beef noodles'）
-        predictions (list[dict]): YOLO 偵測結果，包含 'name'
-
-    回傳:
-        food_infos (list[dict]): 包含營養資訊與是否為主分類食材
+    回傳主分類食物與 YOLO 食材的營養資訊列表（含是否為主分類）。
     """
     seen = set()
     food_infos = []
+    food_zh_name = food  # 預設主分類名稱就是英文（若查不到時用）
 
-    # 加入主分類食材（如果在資料庫中找得到）
+    # 加入主分類食物
     if food:
         try:
             main_food = FoodNutrition.objects.get(food_name_en__iexact=food)
+            food_zh_name = main_food.food_name_zh  # 取中文名稱
             food_infos.append({
                 "name_en": main_food.food_name_en,
                 "name_zh": main_food.food_name_zh,
@@ -92,13 +87,13 @@ def query_unique_food_info(food, predictions):
         if name.lower() not in seen:
             seen.add(name.lower())
             try:
-                food = FoodNutrition.objects.get(food_name_en__iexact=name)
+                ingredient = FoodNutrition.objects.get(food_name_en__iexact=name)
                 food_infos.append({
-                    "name_en": food.food_name_en,
-                    "name_zh": food.food_name_zh,
-                    "calories": food.calories,
-                    "protein": food.protein,
-                    "carbs": food.carbs,
+                    "name_en": ingredient.food_name_en,
+                    "name_zh": ingredient.food_name_zh,
+                    "calories": ingredient.calories,
+                    "protein": ingredient.protein,
+                    "carbs": ingredient.carbs,
                     "is_main": False
                 })
             except FoodNutrition.DoesNotExist:
@@ -108,4 +103,31 @@ def query_unique_food_info(food, predictions):
                     "is_main": False
                 })
 
-    return food_infos
+    return food_infos, food_zh_name
+
+
+
+def sum_nutrition(food_infos):
+    """
+    加總營養資訊：
+    - 若有食材（非主分類，且有營養值），只加總食材。
+    - 若無食材，則只加總主分類食物。
+    """
+    # 有任何非主分類且有熱量的食材
+    ingredients = [i for i in food_infos if not i.get("is_main") and "calories" in i]
+
+    if ingredients:
+        items_to_sum = ingredients
+        source = "食材"
+    else:
+        items_to_sum = [i for i in food_infos if i.get("is_main") and "calories" in i]
+        source = "主分類"
+
+    return {
+        "total_calories": sum(i.get("calories", 0) for i in items_to_sum),
+        "total_protein": sum(i.get("protein", 0) for i in items_to_sum),
+        "total_carbs": sum(i.get("carbs", 0) for i in items_to_sum),
+        "source": source,
+        "item_count": len(items_to_sum)
+    }
+

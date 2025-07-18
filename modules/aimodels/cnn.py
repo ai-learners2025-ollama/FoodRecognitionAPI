@@ -5,7 +5,7 @@ import os
 from django.conf import settings
 
 img_size = 224
-classes = np.array(['beef_noodles', 'bubble_tea', 'curry_rice', 'donut', 'other', 'steak'])
+classes = np.array(['beef noodles', 'bubble_tea', 'curry_rice', 'donut', 'other', 'steak'])
 
 def classifyFood(food_img):
     # img = image.load_img(food_img, target_size=(img_size, img_size))
