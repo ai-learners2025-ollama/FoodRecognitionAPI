@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from PIL import Image
-from modules.aimodels.cnn import classifyFood
-from modules.aimodels.yolo import detect_image, query_food_infos, sum_nutrition
+from modules.aimodels import cnn, yolo
+# from modules.aimodels.yolo import detect_image, query_food_infos, sum_nutrition
 
 def test(request):
     if request.method == 'GET':
@@ -10,15 +10,15 @@ def test(request):
         img = Image.open(request.FILES.get('image'))
 
         # 主分類（英文）
-        result = classifyFood(img)
+        result = cnn.classifyFood(img)
 
         # YOLO 偵測
-        path, predictions = detect_image(img)
+        path, predictions = yolo.detect_image(img)
 
         # 查詢營養資訊 + 主分類中文
-        food_infos, food_zh = query_food_infos(result, predictions)
+        food_infos, food_zh = yolo.query_food_infos(result, predictions)
 
-        summary = sum_nutrition(food_infos)
+        summary = yolo.sum_nutrition(food_infos)
 
          # ✅ 移除主分類，只保留 is_main=False 的項目（食材）
         food_infos = [info for info in food_infos if not info.get("is_main")]
