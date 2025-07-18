@@ -141,3 +141,7 @@ public/*
 !public/.gitkeep
 !public/assets
 !public/assets/.gitkeep
+
+outputs/*
+!outputs/.gitkeep
+!outputs/predict/.gitkeep
