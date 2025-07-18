@@ -13,45 +13,42 @@
                 <div class="text-center">
                     <input class="btn btn-primary btn-lg mt-3" type="submit" value="送出">
                 </div>
-                <div class="text-center">
-                  
-
-<h2 style="text-align:center;">分類主食：{{ food_zh  }}</h2>
-
-    <table>
-        <thead>
-            <tr>
-                <th>食材項目</th>
-                
-            </tr>
-        </thead>
-        <tbody>
-            {% for food in food_infos %}
-            <tr class="{% if food.is_main %}main-food{% endif %}">
-                <td>
-                    {{ food.name_zh|default:food.name_en }}
-                    {% if food.error %}
-                        <br><small style="color: red;">{{ food.error }}</small>
-                    {% endif %}
-                </td>
-               
-               
-            </tr>
-            {% endfor %}
-          
-        </tbody>
-    </table>
-
- <h4>總營養資訊（依據：{{ summary.source }}）</h4>
-<ul>
-    <li>熱量：{{ summary.total_calories }} kcal</li>
-    <li>蛋白質：{{ summary.total_protein }} g</li>
-    <li>碳水化合物：{{ summary.total_carbs }} g</li>
-</ul>
-                </div>
             </form>
+
+            {% if result %}
+            <hr>
+            <div class="text-center">
+                <h2 style="text-align:center;">分類主食：{{ food_zh  }}</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>食材項目</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for food in food_infos %}
+                        <tr class="{% if food.is_main %}main-food{% endif %}">
+                            <td>
+                                {{ food.name_zh|default:food.name_en }}
+                                {% if food.error %}
+                                    <br><small style="color: red;">{{ food.error }}</small>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <hr>
+                <h4>總營養資訊（依據：{{ summary.source }}）</h4>
+                <ul>
+                    <li>熱量：{{ summary.total_calories }} kcal</li>
+                    <li>蛋白質：{{ summary.total_protein }} g</li>
+                    <li>碳水化合物：{{ summary.total_carbs }} g</li>
+                </ul>
+                <hr>
+            </div>
+            {% endif %}
         </div>
-         
     </div>
     {% if result %}
     <!-- Modal -->
