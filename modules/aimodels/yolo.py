@@ -2,6 +2,7 @@ import os
 from PIL import Image
 from ultralytics import YOLO
 from food_recognition.models import FoodNutrition 
+from django.conf import settings
 
 def detect_image(image_input, save_dir: str = "outputs"):
     """
@@ -15,6 +16,7 @@ def detect_image(image_input, save_dir: str = "outputs"):
         result_img_path (str): 儲存的圖片完整路徑
         predictions (list[dict]): 辨識結果
     """
+    save_dir = settings.BASE_DIR + "/" + save_dir
     os.makedirs(save_dir, exist_ok=True)
     model = YOLO('best.pt')
 

@@ -4,3 +4,4 @@ pillow==11.3.0
 tensorflow==2.18.1
 line-bot-sdk==3.11.0
 django-import-export==4.3.8
+ultralytics==8.3.167
