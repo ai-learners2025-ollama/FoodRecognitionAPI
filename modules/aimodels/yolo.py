@@ -23,17 +23,26 @@ def detect_image(image_input, save_dir: str = "outputs"):
 
     # 判斷圖片輸入形式：字串路徑 or PIL.Image
     if isinstance(image_input, str):
+        # 圖片來源為檔案路徑
         image_path = image_input
-        results = model(image_path, save=True, save_dir=save_dir)
         save_name = os.path.basename(image_path)
     elif isinstance(image_input, Image.Image):
-        # 給予暫存檔名
-        temp_path = os.path.join(save_dir, "temp_input.jpg")
-        image_input.save(temp_path)
-        results = model(temp_path, save=True, save_dir=save_dir)
+        # 圖片來源為 PIL Image，先儲存為暫存檔
+        image_path = os.path.join(save_dir, "temp_input.jpg")
+        image_input.save(image_path)
         save_name = "temp_input.jpg"
     else:
         raise TypeError("image_input 必須是 str 或 PIL.Image")
+
+    # 使用 model.predict 並指定儲存路徑
+    results = model.predict(
+        source=image_path,
+        save=True,
+        save_txt=False,      # 儲存 YOLO 格式的 推論標註文字檔
+        project=save_dir,    # 用作根資料夾
+        name="",             # 不加子資料夾
+        exist_ok=True
+    )
 
     # YOLO 自動儲存處理後圖檔於 save_dir/images
     result_img_path = os.path.join(save_dir, "images", save_name)
