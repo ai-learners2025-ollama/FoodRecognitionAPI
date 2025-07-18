@@ -136,3 +136,8 @@ GitHub.sublime-settings
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
+
+public/*
+!public/.gitkeep
+!public/assets
+!public/assets/.gitkeep
