@@ -19,7 +19,7 @@ def detect_image(image_input, save_dir: str = "outputs"):
     """
     
     date_str = datetime.now().strftime('%Y-%m-%d')
-    save_dir = os.path.join(settings.BASE_DIR, f'{save_dir}/{date_str}/')
+    save_dir = os.path.join(settings.BASE_DIR, save_dir, date_str)
     os.makedirs(save_dir, exist_ok=True)
     yolo_model_path = os.path.join(settings.BASE_DIR, 'best.pt')
     model = YOLO(yolo_model_path)

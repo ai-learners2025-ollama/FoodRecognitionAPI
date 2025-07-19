@@ -1,5 +1,6 @@
 from food_recognition.models import RecogLog, RecogModel
 from datetime import datetime
+import base64
 
 def get_enabled_model(model_type: int = 1):
     """
@@ -53,4 +54,18 @@ def get_client_ip(request):
     if x_forwarded_for:
         return x_forwarded_for.split(',')[0]
     return request.META.get('REMOTE_ADDR')
+
+
+
+
+def image_to_base64(image_path: str) -> str:
+    """
+    將圖片檔案轉成 Base64 字串，回傳 HTML 可用的格式。
+    參數: image_path - 圖片的絕對路徑
+    """
+    with open(image_path, 'rb') as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+        ext = image_path.split('.')[-1].lower()
+        return f"data:image/{ext};base64,{encoded_string}"
+
 

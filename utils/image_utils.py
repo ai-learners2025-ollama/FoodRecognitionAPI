@@ -10,7 +10,7 @@ def uploaded_image(image_file, save_dir: str = "outputs"):
     save_dir = os.path.join(settings.BASE_DIR, save_dir)
     # 儲存目錄：依日期建立
     date_str = datetime.now().strftime('%Y-%m-%d')
-    folder_original = os.path.join(settings.BASE_DIR, f'{save_dir}/{date_str}/original/')
+    folder_original = os.path.join(settings.BASE_DIR, save_dir, date_str, "original")
     os.makedirs(folder_original, exist_ok=True)
 
     # 產生唯一檔名

@@ -1,8 +1,10 @@
+import os
 from django.shortcuts import render
 from PIL import Image
 from modules.aimodels import cnn, yolo
 from django.http import HttpResponseBadRequest
 from utils import image_utils, models_utils
+
 # from modules.aimodels.yolo import detect_image, query_food_infos, sum_nutrition
 
 def test(request):
@@ -92,11 +94,13 @@ def test2(request):
         )
 
 
+        image_url = f"/original/{filename}"
         return render(request, 'pages/test2.html', {
             'result': result,           # 英文主分類
             'food_zh': food_zh,         # 中文主分類
             'food_infos': food_infos,   # 食材 + 主分類列表
             'summary': summary,         # 總營養
+            'image_url': ""      # 傳給前端顯示圖片
         })
         
         

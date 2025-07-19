@@ -8,7 +8,7 @@
         <label for="image" style="cursor: pointer; display: block; border: 3px dashed #aaa;  border-radius: 10px;">
             <input type="file" id="image" name="image" accept="image/jpeg" onchange="handleFiles(this.files)"
                 style="display:none;">
-            <img id="original" src="/static/images/file_upload.jpg"
+            <img id="original" src="{% if image_url %}{{ image_url }}{% else %}/static/images/file_upload.jpg{% endif %}"
                 style="width: 100%; max-width: 100%; border: 1px solid #ccc; border-radius: 8px; " />
         </label>
         <input class="btn btn-primary btn-lg mt-3" type="submit" value="開始辨識">
