@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from tests.views import test
+from tests.views import test,test2
 from line_bot.views import callback
 from django.conf import settings
 from django.conf.urls.static import static
@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', test),
     path('line/', callback),
+    path('test2/', test2),
 ]
 
 if settings.DEBUG:

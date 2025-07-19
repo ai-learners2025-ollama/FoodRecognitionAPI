@@ -3,6 +3,7 @@ from PIL import Image
 from ultralytics import YOLO
 from food_recognition.models import FoodNutrition 
 from django.conf import settings
+from datetime import datetime
 
 def detect_image(image_input, save_dir: str = "outputs"):
     """
@@ -16,7 +17,9 @@ def detect_image(image_input, save_dir: str = "outputs"):
         result_img_path (str): 儲存的圖片完整路徑
         predictions (list[dict]): 辨識結果
     """
-    save_dir = os.path.join(settings.BASE_DIR, save_dir)
+    
+    date_str = datetime.now().strftime('%Y-%m-%d')
+    save_dir = os.path.join(settings.BASE_DIR, f'{save_dir}/{date_str}/')
     os.makedirs(save_dir, exist_ok=True)
     yolo_model_path = os.path.join(settings.BASE_DIR, 'best.pt')
     model = YOLO(yolo_model_path)
@@ -26,11 +29,11 @@ def detect_image(image_input, save_dir: str = "outputs"):
         # 圖片來源為檔案路徑
         image_path = image_input
         save_name = os.path.basename(image_path)
-    elif isinstance(image_input, Image.Image):
-        # 圖片來源為 PIL Image，先儲存為暫存檔
-        image_path = os.path.join(save_dir, "temp_input.jpg")
-        image_input.save(image_path)
-        save_name = "temp_input.jpg"
+    # elif isinstance(image_input, Image.Image):
+    #     # 圖片來源為 PIL Image，先儲存為暫存檔
+    #     image_path = os.path.join(save_dir, "temp_input.jpg")
+    #     image_input.save(image_path)
+    #     save_name = "temp_input.jpg"
     else:
         raise TypeError("image_input 必須是 str 或 PIL.Image")
 
@@ -45,7 +48,7 @@ def detect_image(image_input, save_dir: str = "outputs"):
     )
 
     # YOLO 自動儲存處理後圖檔於 save_dir/images
-    result_img_path = os.path.join(save_dir, "images", save_name)
+    result_img_path = os.path.join(save_dir, "project", save_name)
 
     # 辨識資訊整理
     boxes = results[0].boxes
