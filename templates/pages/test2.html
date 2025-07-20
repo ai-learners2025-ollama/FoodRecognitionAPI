@@ -81,6 +81,11 @@
         {% endif %}
     </script>
 
+
+    {% comment %} <button id="openCameraButton">開啟相機拍照</button>
+    <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none;">
+    <img id="previewImage" style="max-width: 100%; margin-top: 20px;"> {% endcomment %}
+
     <style>
         #drop-area {
 
@@ -156,6 +161,31 @@
             reader.readAsDataURL(file);
 
         }
+
+
+     {% comment %} const openCameraButton = document.getElementById('openCameraButton');
+        const cameraInput = document.getElementById('cameraInput');
+        const previewImage = document.getElementById('previewImage');
+
+        openCameraButton.addEventListener('click', () => {
+            // 點擊按鈕時，觸發檔案輸入框的點擊事件
+            cameraInput.click();
+        });
+
+        cameraInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                // 如果使用者拍照並選擇了圖片，則預覽圖片
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }); {% endcomment %}
     </script>
 
+
+    
+</body>
     {% endblock %}
