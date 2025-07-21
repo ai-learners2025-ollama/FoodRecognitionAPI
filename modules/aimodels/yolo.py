@@ -5,52 +5,52 @@ from food_recognition.models import FoodNutrition
 from django.conf import settings
 from datetime import datetime
 
-def detect_image(image_input, save_dir: str = "outputs"):
+def detect_image(image_input, save_dir: str = "models/"):
     """
-    使用 YOLO 模型進行圖片偵測，支援傳入檔案路徑或 PIL.Image，回傳結果圖路徑與辨識內容。
-
-    參數:
-        image_input (str | PIL.Image): 圖片檔案路徑或 PIL.Image 物件
-        save_dir (str): 儲存偵測後圖片資料夾
-
-    回傳:
-        result_img_path (str): 儲存的圖片完整路徑
-        predictions (list[dict]): 辨識結果
+    使用 YOLO 模型進行圖片偵測，支援傳入圖片路徑或 PIL.Image，回傳結果圖的相對路徑與辨識內容。
     """
-    
-    date_str = datetime.now().strftime('%Y-%m-%d')
-    save_dir = os.path.join(settings.BASE_DIR, save_dir, date_str)
-    os.makedirs(save_dir, exist_ok=True)
+    # 設定實體儲存路徑
+    date_str = datetime.now().strftime('%Y_%m')
+    save_dir_abs = os.path.join(settings.MEDIA_ROOT, save_dir, date_str)  # e.g., /.../media/models/2025_07
+    os.makedirs(save_dir_abs, exist_ok=True)
+
+    # 載入模型
     yolo_model_path = os.path.join(settings.BASE_DIR, 'best.pt')
     model = YOLO(yolo_model_path)
 
-    # 判斷圖片輸入形式：字串路徑 or PIL.Image
+    # 處理輸入
     if isinstance(image_input, str):
-        # 圖片來源為檔案路徑
         image_path = image_input
         save_name = os.path.basename(image_path)
-    # elif isinstance(image_input, Image.Image):
-    #     # 圖片來源為 PIL Image，先儲存為暫存檔
-    #     image_path = os.path.join(save_dir, "temp_input.jpg")
-    #     image_input.save(image_path)
-    #     save_name = "temp_input.jpg"
+    elif isinstance(image_input, Image.Image):
+        save_name = "temp_input.jpg"
+        image_path = os.path.join(save_dir_abs, save_name)
+        
+        # ext = os.path.splitext(image_path.name)[1]
+        # uid = uuid.uuid4().hex
+        # filename = f"{uid}{ext}"
+        image_input.save(image_path)
     else:
         raise TypeError("image_input 必須是 str 或 PIL.Image")
 
-    # 使用 model.predict 並指定儲存路徑
+    # 模型推論
     results = model.predict(
         source=image_path,
         save=True,
-        save_txt=False,      # 儲存 YOLO 格式的 推論標註文字檔
-        project=save_dir,    # 用作根資料夾
-        name="",             # 不加子資料夾
+        save_txt=False,
+        project=save_dir_abs,  # 真正存檔目錄
+        name="",               # 不加子目錄
         exist_ok=True
     )
 
-    # YOLO 自動儲存處理後圖檔於 save_dir/images
-    result_img_path = os.path.join(save_dir, "project", save_name)
+    # 結果圖片實際位置（預設 YOLO 存在 images 資料夾）
+    result_img_abs_path = os.path.join(save_dir_abs, "images", save_name)
 
-    # 辨識資訊整理
+    # 將結果路徑轉為可用於前端的 MEDIA URL 相對路徑
+    relative_path = os.path.relpath(result_img_abs_path, settings.MEDIA_ROOT)  # e.g., "models/2025_07/images/xxx.jpg"
+    image_url = os.path.join(settings.MEDIA_URL, relative_path).replace("\\", "/")  # e.g., "/media/models/..."
+
+    # 整理辨識結果
     boxes = results[0].boxes
     predictions = []
     for box in boxes:
@@ -64,7 +64,7 @@ def detect_image(image_input, save_dir: str = "outputs"):
             "box": [round(coord, 1) for coord in xyxy]
         })
 
-    return result_img_path, predictions
+    return image_url, predictions
 
 def query_food_infos(food, predictions):
     """

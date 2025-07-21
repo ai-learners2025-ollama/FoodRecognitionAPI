@@ -51,7 +51,7 @@ def test2(request):
         model_id1 = 1
 
         # 儲存圖檔
-        filename, folder_original = image_utils.uploaded_image(image_file)
+        filename, folder_original, original_path = image_utils.uploaded_image(image_file)
 
         img = Image.open(image_file)
 
@@ -72,7 +72,7 @@ def test2(request):
         # 取食材模型
         # model_id2, model_file2 = models_utils.get_enabled_model(2)
         model_id2 = 2
-        path, predictions = yolo.detect_image(folder_original)
+        path, predictions = yolo.detect_image(original_path)
 
         # 查詢營養資訊 + 主分類中文
         food_infos, food_zh = yolo.query_food_infos(result, predictions)

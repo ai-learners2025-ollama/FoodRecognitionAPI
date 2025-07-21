@@ -3,6 +3,9 @@ from .models import FoodNutrition, RecogLog, RecogModel
 from import_export.admin import ExportMixin, ImportMixin, ImportExportModelAdmin
 from django.utils import timezone
 from import_export import resources, fields
+from django.conf import settings
+import os
+from django.utils.html import format_html
 
 
 class FoodNutritionResource(resources.ModelResource):
@@ -37,6 +40,12 @@ class FoodNutritionResource(resources.ModelResource):
         
 @admin.register(FoodNutrition)
 class FoodNutritionAdmin(ImportExportModelAdmin):
+    # 清單頁
+    list_display = ('food_name_en', 'food_name_zh', 'calories', 'protein', 'carbs', 'is_recog', 'create_user', 'create_date', 'update_user', 'update_date')
+    search_fields = ('food_name_en', 'food_name_zh')   
+    ordering = ('food_name_en',)  # 按照出版日期排序
+    list_per_page = 50  # 每页显示 25 条记录
+    
     resource_class = FoodNutritionResource
     readonly_fields = ('create_user', 'create_date', 'update_date', 'update_user')  # 管理頁面不可編輯
 
@@ -60,10 +69,70 @@ class FoodNutritionAdmin(ImportExportModelAdmin):
         return {'context': {'request': request}}
 
 
-admin.site.register(RecogLog)
+@admin.register(RecogLog)
+class RecogLogAdmin(admin.ModelAdmin):
+    # 清單頁
+    list_display = ('image_name', 'recog_content', 'recog_model_id', 'model_type', 'create_ip', 'create_date')     
+    ordering = ('create_date',)  # 按照出版日期排序
+    list_per_page = 50  # 每页显示 25 条记录
+    
+       
+    # 禁止新增功能
+    def has_add_permission(self, request):
+        return False
+
+    # 禁止编辑功能
+    def has_change_permission(self, request, obj=None):
+        return False
+    
+    # 顯示圖片預覽
+    def image_preview(self, obj):
+        if obj.image_path:
+           
+            # 假設相對路徑為
+            relative_image_path = "models/2025_07/original/81464651721a43a7ad9516f3738973b0.jpg"
+                    
+            # 使用 os.path.join() 合併路徑
+            image_url = os.path.join(settings.MEDIA_URL, relative_image_path.replace('\\', '/'))
+
+            # 返回圖片的 HTML 標籤，並設置預覽尺寸
+            return format_html('<img src="{}" width="150" height="150" />', image_url)
+           
+        return '無圖片'
+
+    image_preview.allow_tags = True  # 允許返回 HTML 標籤
+    image_preview.short_description = '圖片預覽'
+       
+    def recog_image_name_view(self, obj):
+        if obj.recog_image_name:
+           
+            # 假設相對路徑為
+            relative_image_path = "models/2025_07/predict/81464651721a43a7ad9516f3738973b0.jpg"
+                    
+            # 使用 os.path.join() 合併路徑
+            image_url = os.path.join(settings.MEDIA_URL, relative_image_path.replace('\\', '/'))
+
+            # 返回圖片的 HTML 標籤，並設置預覽尺寸
+            return format_html('<img src="{}" width="150" height="150" />', image_url)
+           
+        return '無圖片'
+
+    recog_image_name_view.allow_tags = True  # 允許返回 HTML 標籤
+    recog_image_name_view.short_description = '圖片預覽'
+
+    # 在詳細頁面顯示圖片預覽
+    readonly_fields = ('image_preview','recog_image_name_view')
+
+     
 
 @admin.register(RecogModel)
 class RecogModelAdmin(admin.ModelAdmin):
+    # 清單頁
+    list_display = ('model_name', 'model_type', 'model_file', 'update_date')
+    search_fields = ('model_name', 'model_type',)
+    ordering = ('update_date',)  # 按照出版日期排序
+    list_per_page = 50  # 每页显示 25 条记录
+    
     readonly_fields = ('model_file','create_user', 'create_date', 'update_date', 'update_user')  # 管理頁面不可編輯
 
     # 新增頁面不顯示更新欄位（exclude 就是排除欄位）

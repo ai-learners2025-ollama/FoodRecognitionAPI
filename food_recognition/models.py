@@ -7,7 +7,7 @@ FOOD = 2
 
 MODEL_TYPE_CHOICES = [
     (DISH, "菜餚"),
-    (FOOD, "食品"),
+    (FOOD, "食材"),
 ]
 
 
