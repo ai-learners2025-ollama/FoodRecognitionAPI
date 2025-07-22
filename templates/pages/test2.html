@@ -1,7 +1,7 @@
 {% extends "scaffolds/base.html" %}
 {% block content %}
 
-<h2 style="text-align:center;">拖拉圖片上傳並執行 YOLOv8 辨識</h2>
+<h2 style="text-align:center;">拖拉圖片上傳執行辨識</h2>
 <div id="drop-area">
     <form method="post" enctype="multipart/form-data" id="upload-form" style="margin-bottom: 0px;">
         {% csrf_token %}
@@ -10,13 +10,14 @@
                 style="display:none;">
             <img id="original" src="{% if image_url %}{{ image_url }}{% else %}/static/images/file_upload.jpg{% endif %}"
                 style="width: 100%; max-width: 100%; border: 1px solid #ccc; border-radius: 8px; " />
+            <input type="hidden" name="image_src" id="image_src" value="{{ image_url }}">    
         </label>
         <input class="btn btn-primary btn-lg mt-3" type="submit" value="開始辨識">
     </form>
     <div style="text-align:center;">
        
         <img id="preview" style="max-width: 400px; margin-top: 10px; border: 1px solid #aaa; display: none;" />
-        {% if result %}
+        {% if food_zh %}
         <hr>
         <div class="text-center">
             <h2 style="text-align:center;">分類主食：{{ food_zh }}</h2>
@@ -54,7 +55,7 @@
 
 
 
-{% if result %}
+{% if food_zh %}
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -64,7 +65,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                {{ result }}
+                {{ food_zh }}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
@@ -73,7 +74,7 @@
     </div>
     {% endif %}
     <script>
-        {% if result %}
+        {% if food_zh %}
         window.onload = function () {
             var myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
             myModal.show()
@@ -144,7 +145,7 @@
             const file = files[0];
             if (!file) return;
 
-            // 設定回 input（讓 input 的值也同步）
+            // 同步 input
             document.getElementById("image").files = files;
 
             if (!file.name.match(/\.jpg$/i)) {
@@ -154,12 +155,16 @@
 
             const reader = new FileReader();
             reader.onload = function (e) {
-                const original = document.getElementById("original");
-                original.src = e.target.result;
-                original.style.display = "block";
-            };
-            reader.readAsDataURL(file);
+                const base64Data = e.target.result;
 
+                const original = document.getElementById("original");
+                original.src = base64Data;
+                original.style.display = "block";
+
+                document.getElementById('image_src').value = base64Data;
+            };
+
+            reader.readAsDataURL(file);
         }
 
 

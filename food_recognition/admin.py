@@ -72,7 +72,7 @@ class FoodNutritionAdmin(ImportExportModelAdmin):
 @admin.register(RecogLog)
 class RecogLogAdmin(admin.ModelAdmin):
     # 清單頁
-    list_display = ('image_name', 'recog_content', 'recog_model_id', 'model_type', 'create_ip', 'create_date')     
+    list_display = ('image_name', 'model_type', 'recog_content', 'recog_model_id', 'create_ip', 'create_date')     
     ordering = ('create_date',)  # 按照出版日期排序
     list_per_page = 50  # 每页显示 25 条记录
     
@@ -89,14 +89,8 @@ class RecogLogAdmin(admin.ModelAdmin):
     def image_preview(self, obj):
         if obj.image_path:
            
-            # 假設相對路徑為
-            relative_image_path = "models/2025_07/original/81464651721a43a7ad9516f3738973b0.jpg"
-                    
-            # 使用 os.path.join() 合併路徑
-            image_url = os.path.join(settings.MEDIA_URL, relative_image_path.replace('\\', '/'))
-
             # 返回圖片的 HTML 標籤，並設置預覽尺寸
-            return format_html('<img src="{}" width="150" height="150" />', image_url)
+            return format_html('<img src="{0}" width="150" height="150" />', obj.image_path)
            
         return '無圖片'
 
@@ -106,14 +100,8 @@ class RecogLogAdmin(admin.ModelAdmin):
     def recog_image_name_view(self, obj):
         if obj.recog_image_name:
            
-            # 假設相對路徑為
-            relative_image_path = "models/2025_07/predict/81464651721a43a7ad9516f3738973b0.jpg"
-                    
-            # 使用 os.path.join() 合併路徑
-            image_url = os.path.join(settings.MEDIA_URL, relative_image_path.replace('\\', '/'))
-
             # 返回圖片的 HTML 標籤，並設置預覽尺寸
-            return format_html('<img src="{}" width="150" height="150" />', image_url)
+            return format_html('<img src="{0}" width="150" height="150" />', obj.recog_image_name)
            
         return '無圖片'
 

@@ -4,18 +4,14 @@ import base64
 
 def get_enabled_model(model_type: int = 1):
     """
-    取得第一筆 is_enabled=True 且指定 model_type 的 RecogModel 資料
-    回傳 (recog_model_id, model_type)，若無資料或發生錯誤則回傳 (None, None)
+    取得第一筆 is_enabled=True 且指定 model_type 的 RecogModel 物件
+    若查無或發生錯誤則回傳 None
     """
     try:
-        recog_model = RecogModel.objects.filter(model_type=model_type, is_enabled=True).first()
-        if recog_model:
-            return recog_model.id, recog_model.model_file
-        else:
-            return None, None
+        return RecogModel.objects.filter(model_type=model_type, is_enabled=True).first()
     except Exception as e:
-       
-        return None, None
+        print(f"[get_enabled_model] 錯誤：{e}")
+        return None
 
 
 

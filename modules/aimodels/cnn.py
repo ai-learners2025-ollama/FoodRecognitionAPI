@@ -6,15 +6,19 @@ from django.conf import settings
 
 img_size = 224
 # classes = np.array(['beef_noodles', 'bubble_tea', 'curry_rice', 'donut', 'other', 'steak'])
-classes = np.array(['beef noodles', 'bubble_tea', 'curry_rice', 'donut', 'non_food', 'other_food', 'steak'])
+# classes = np.array(['beef noodles', 'bubble_tea', 'curry_rice', 'donut', 'non_food', 'other_food', 'steak'])
 
-def classifyFood(food_img):
+def classifyFood(food_img, model1):
+    
+    items = model1.recog_items
+    classes = np.array([item.strip() for item in items.split(',')])
+
     # img = image.load_img(food_img, target_size=(img_size, img_size))
     img = food_img.resize((img_size, img_size)) 
     img = image.img_to_array(img) / 255.0
     img = np.expand_dims(img, axis = 0)
 
-    model_path = os.path.join(settings.BASE_DIR, 'food_model.keras')
+    model_path = os.path.join(settings.BASE_DIR, model1.model_path.path)
     model = load_model(model_path)
 
     pred = model.predict(img)

@@ -5,66 +5,58 @@ from food_recognition.models import FoodNutrition
 from django.conf import settings
 from datetime import datetime
 
-def detect_image(image_input, save_dir: str = "models/"):
+def detect_image(filename, original_path, model_file2):
     """
     使用 YOLO 模型進行圖片偵測，支援傳入圖片路徑或 PIL.Image，回傳結果圖的相對路徑與辨識內容。
     """
-    # 設定實體儲存路徑
-    date_str = datetime.now().strftime('%Y_%m')
-    save_dir_abs = os.path.join(settings.MEDIA_ROOT, save_dir, date_str)  # e.g., /.../media/models/2025_07
-    os.makedirs(save_dir_abs, exist_ok=True)
+    try:
+        # 設定實體儲存路徑
+        date_str = datetime.now().strftime('%Y_%m')
+        save_dir_abs = os.path.join(settings.MEDIA_IMAGE, date_str)  # e.g., /.../media/models/2025_07
+        os.makedirs(save_dir_abs, exist_ok=True)
 
-    # 載入模型
-    yolo_model_path = os.path.join(settings.BASE_DIR, 'best.pt')
-    model = YOLO(yolo_model_path)
+        # 載入模型（model_file2 為絕對路徑或相對於 BASE_DIR 的路徑）
+        yolo_model_path = os.path.join(settings.BASE_DIR, model_file2)
+        if not os.path.isfile(yolo_model_path):
+            raise FileNotFoundError(f"模型檔案不存在：{yolo_model_path}")
 
-    # 處理輸入
-    if isinstance(image_input, str):
-        image_path = image_input
-        save_name = os.path.basename(image_path)
-    elif isinstance(image_input, Image.Image):
-        save_name = "temp_input.jpg"
-        image_path = os.path.join(save_dir_abs, save_name)
-        
-        # ext = os.path.splitext(image_path.name)[1]
-        # uid = uuid.uuid4().hex
-        # filename = f"{uid}{ext}"
-        image_input.save(image_path)
-    else:
-        raise TypeError("image_input 必須是 str 或 PIL.Image")
+        model = YOLO(yolo_model_path)
 
-    # 模型推論
-    results = model.predict(
-        source=image_path,
-        save=True,
-        save_txt=False,
-        project=save_dir_abs,  # 真正存檔目錄
-        name="",               # 不加子目錄
-        exist_ok=True
-    )
+        # 模型推論
+        results = model.predict(
+            source=original_path,
+            save=True,
+            save_txt=False,
+            project=save_dir_abs,
+            name="",  # 不加子資料夾
+            exist_ok=True
+        )
 
-    # 結果圖片實際位置（預設 YOLO 存在 images 資料夾）
-    result_img_abs_path = os.path.join(save_dir_abs, "images", save_name)
+        # 結果圖片儲存路徑
+        relative_path = os.path.join(settings.MEDIA_IMAGE_URL, date_str, 'predict', filename).replace('\\', '/')
 
-    # 將結果路徑轉為可用於前端的 MEDIA URL 相對路徑
-    relative_path = os.path.relpath(result_img_abs_path, settings.MEDIA_ROOT)  # e.g., "models/2025_07/images/xxx.jpg"
-    image_url = os.path.join(settings.MEDIA_URL, relative_path).replace("\\", "/")  # e.g., "/media/models/..."
+        # 整理辨識結果
+        boxes = results[0].boxes
+        predictions = []
+        for box in boxes:
+            try:
+                cls_id = int(box.cls[0])
+                name = results[0].names[cls_id]
+                conf = float(box.conf[0])
+                xyxy = box.xyxy[0].tolist()
+                predictions.append({
+                    "name": name,
+                    "conf": round(conf, 4),
+                    "box": [round(coord, 1) for coord in xyxy]
+                })
+            except Exception as box_err:
+                print(f"[detect_image] 無法解析辨識框：{box_err}")
 
-    # 整理辨識結果
-    boxes = results[0].boxes
-    predictions = []
-    for box in boxes:
-        cls_id = int(box.cls[0])
-        name = results[0].names[cls_id]
-        conf = float(box.conf[0])
-        xyxy = box.xyxy[0].tolist()
-        predictions.append({
-            "name": name,
-            "conf": round(conf, 4),
-            "box": [round(coord, 1) for coord in xyxy]
-        })
+        return predictions, relative_path
 
-    return image_url, predictions
+    except Exception as e:
+        print(f"[detect_image] 發生錯誤：{e}")
+        return [], None
 
 def query_food_infos(food, predictions):
     """
@@ -128,21 +120,31 @@ def sum_nutrition(food_infos):
     - 若有食材（非主分類，且有營養值），只加總食材。
     - 若無食材，則只加總主分類食物。
     """
-    # 有任何非主分類且有熱量的食材
-    ingredients = [i for i in food_infos if not i.get("is_main") and "calories" in i]
+    try:
+        # 有任何非主分類且有熱量的食材
+        ingredients = [i for i in food_infos if not i.get("is_main") and "calories" in i]
 
-    if ingredients:
-        items_to_sum = ingredients
-        source = "食材"
-    else:
-        items_to_sum = [i for i in food_infos if i.get("is_main") and "calories" in i]
-        source = "主分類"
+        if ingredients:
+            items_to_sum = ingredients
+            source = "食材"
+        else:
+            items_to_sum = [i for i in food_infos if i.get("is_main") and "calories" in i]
+            source = "主分類"
 
-    return {
-        "total_calories": sum(i.get("calories", 0) for i in items_to_sum),
-        "total_protein": sum(i.get("protein", 0) for i in items_to_sum),
-        "total_carbs": sum(i.get("carbs", 0) for i in items_to_sum),
-        "source": source,
-        "item_count": len(items_to_sum)
-    }
+        return {
+            "total_calories": sum(i.get("calories", 0) or 0 for i in items_to_sum),
+            "total_protein": sum(i.get("protein", 0) or 0 for i in items_to_sum),
+            "total_carbs": sum(i.get("carbs", 0) or 0 for i in items_to_sum),
+            "source": source,
+            "item_count": len(items_to_sum)
+        }
+    except Exception as e:
+        print(f"[sum_nutrition] 錯誤：{e}")
+        return {
+            "total_calories": 0,
+            "total_protein": 0,
+            "total_carbs": 0,
+            "source": "錯誤",
+            "item_count": 0
+        }
 

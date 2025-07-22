@@ -1,5 +1,7 @@
 from django.db import models
+from django.conf import settings
 import os
+import uuid
 
 
 DISH = 1
@@ -30,14 +32,14 @@ class FoodNutrition(models.Model):
         return f"{self.food_name_zh} / {self.food_name_en}"
 
 
-def recogLog_image_name_upload_path(instance, filename):
-    # 上傳到：models/2025_07/模型檔案.pt
-    return f"recogLogs/{instance.create_date.strftime('%Y_%m')}/image_name/{filename}"
+# def recogLog_image_name_upload_path(instance, filename):
+#     # 上傳到：models/2025_07/模型檔案.pt
+#     return f"recogLogs/{instance.create_date.strftime('%Y_%m')}/image_name/{filename}"
 
 
-def recogLog_recog_image_name_upload_path(instance, filename):
-    # 上傳到：models/2025_07/模型檔案.pt
-    return f"recogLogs/{instance.create_date.strftime('%Y_%m')}/recog_image_name/{filename}"
+# def recogLog_recog_image_name_upload_path(instance, filename):
+#     # 上傳到：models/2025_07/模型檔案.pt
+#     return f"recogLogs/{instance.create_date.strftime('%Y_%m')}/recog_image_name/{filename}"
 
 
 class RecogLog(models.Model):
@@ -62,15 +64,16 @@ class RecogLog(models.Model):
 
 
 def model_upload_path(instance, filename):
-    # 上傳到：models/2025_07/模型檔案.pt
-    return f"models/{instance.create_date.strftime('%Y_%m')}/{filename}"
+    ext = os.path.splitext(filename)[1]
+    uid = uuid.uuid4().hex
+    filename = f"{uid}{ext}"
+    return f"{settings.MEDIA_MODELS}/{filename}"
 
 
 class RecogModel(models.Model):
 
     model_name = models.CharField("模型名稱", max_length=50)
     model_type = models.IntegerField("辨識類別", choices=MODEL_TYPE_CHOICES)
-    # model_file = models.FileField("上傳模型檔案", upload_to=model_upload_path, blank=True, null=True)
 
     model_file = models.CharField("模型檔案名稱", max_length=100, blank=True, null=True)
     model_path = models.FileField("上傳模型檔案", upload_to=model_upload_path, blank=True, null=True)
