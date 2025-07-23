@@ -19,6 +19,7 @@ class FoodNutrition(models.Model):
     calories = models.DecimalField("熱量 (kcal)", max_digits=5, decimal_places=2)
     protein = models.DecimalField("蛋白質 (g)", max_digits=5, decimal_places=2)
     carbs = models.DecimalField("碳水化合物 (g)", max_digits=5, decimal_places=2)
+    fat = models.DecimalField("脂肪 (g)", max_digits=5, decimal_places=2)
     is_recog = models.BooleanField("是否可辨識", default=True)
     create_user = models.CharField("建立者", max_length=20)
     create_date = models.DateTimeField("建立時間", auto_now_add=True)
@@ -30,16 +31,6 @@ class FoodNutrition(models.Model):
 
     def __str__(self):
         return f"{self.food_name_zh} / {self.food_name_en}"
-
-
-# def recogLog_image_name_upload_path(instance, filename):
-#     # 上傳到：models/2025_07/模型檔案.pt
-#     return f"recogLogs/{instance.create_date.strftime('%Y_%m')}/image_name/{filename}"
-
-
-# def recogLog_recog_image_name_upload_path(instance, filename):
-#     # 上傳到：models/2025_07/模型檔案.pt
-#     return f"recogLogs/{instance.create_date.strftime('%Y_%m')}/recog_image_name/{filename}"
 
 
 class RecogLog(models.Model):

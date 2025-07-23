@@ -97,10 +97,3 @@ python manage.py migrate
 # 建立超級使用者
 python manage.py createsuperuser
 ```
-
-### yolov9
-```shell
-git clone https://github.com/WongKinYiu/yolov9
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-pip install opencv-python pillow matplotlib
-```

@@ -41,7 +41,7 @@ def uploaded_image(image_file):
 def uploaded_base64_image(image_data: str):
     """
     儲存 base64 圖片資料為實體檔案
-    :param image_data: base64 編碼字串（例如 'data:image/jpeg;base64,...'）
+    :param image_data: base64 編碼字串（例如 'data:image/jpg;base64,...'）
     :return: (filename, original_path, relative_path)
     """
     try:

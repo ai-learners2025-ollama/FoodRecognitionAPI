@@ -1,196 +1,223 @@
 {% extends "scaffolds/base.html" %}
 {% block content %}
-
 <h2 style="text-align:center;">拖拉圖片上傳執行辨識</h2>
+
 <div id="drop-area">
-    <form method="post" enctype="multipart/form-data" id="upload-form" style="margin-bottom: 0px;">
-        {% csrf_token %}
-        <label for="image" style="cursor: pointer; display: block; border: 3px dashed #aaa;  border-radius: 10px;">
-            <input type="file" id="image" name="image" accept="image/jpeg" onchange="handleFiles(this.files)"
-                style="display:none;">
-            <img id="original" src="{% if image_url %}{{ image_url }}{% else %}/static/images/file_upload.jpg{% endif %}"
-                style="width: 100%; max-width: 100%; border: 1px solid #ccc; border-radius: 8px; " />
-            <input type="hidden" name="image_src" id="image_src" value="{{ image_url }}">    
-        </label>
-        <input class="btn btn-primary btn-lg mt-3" type="submit" value="開始辨識">
-    </form>
-    <div style="text-align:center;">
-       
-        <img id="preview" style="max-width: 400px; margin-top: 10px; border: 1px solid #aaa; display: none;" />
-        {% if food_zh %}
-        <hr>
-        <div class="text-center">
-            <h2 style="text-align:center;">分類主食：{{ food_zh }}</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>食材項目</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for food in food_infos %}
-                    <tr class="{% if food.is_main %}main-food{% endif %}">
-                        <td>
-                            {{ food.name_zh|default:food.name_en }}
-                            {% if food.error %}
-                            <br><small style="color: red;">{{ food.error }}</small>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <hr>
-            <h4>總營養資訊（依據：{{ summary.source }}）</h4>
-            <ul>
-                <li>熱量：{{ summary.total_calories }} kcal</li>
-                <li>蛋白質：{{ summary.total_protein }} g</li>
-                <li>碳水化合物：{{ summary.total_carbs }} g</li>
-            </ul>
-            <hr>
-        </div>
-        {% endif %}
+  <form method="post" enctype="multipart/form-data" id="upload-form">
+    {% csrf_token %}
+    <label for="image" style="cursor: pointer; display: block; border: 3px dashed #aaa; border-radius: 10px;">
+      <input type="file" id="image" name="image" accept="image/jpeg" onchange="handleFiles(this.files)" style="display:none;">
+      <img id="original" src="{{ image_url|default:'/static/images/file_upload.jpg' }}" style="width: 100%; border: 1px solid #ccc; border-radius: 8px;" />
+      <input type="hidden" name="image_src" id="image_src" value="{{ image_url }}">
+    </label>
+    <input class="btn btn-primary btn-lg mt-3" type="submit" value="開始辨識">
+  </form>
+
+  <input id="openCameraButton" class="btn btn-primary btn-lg mt-3" type="button" value="相機拍照">
+  <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none;">
+
+  <div style="text-align:center;">
+    <img id="preview" style="max-width: 400px; margin-top: 10px; border: 1px solid #aaa; display: none;" />
+    
+    {% if food_zh %}
+    <hr>
+    <div class="text-center">
+      <h2>分類主食：{{ food_zh }}</h2>
+      <table class="table">
+        <thead><tr><th>食材項目</th></tr></thead>
+        <tbody>
+          {% for food in food_infos %}
+          <tr class="{% if food.is_main %}main-food{% endif %}">
+            <td>
+              {{ food.name_zh|default:food.name_en }}
+              {% if food.error %}
+              <br><small style="color: red;">{{ food.error }}</small>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <hr>
+      <h4>總營養資訊（依據：{{ summary.source }}）</h4>
+      <ul>
+        <li>熱量：{{ summary.total_calories }} kcal</li>
+        <li>蛋白質：{{ summary.total_protein }} g</li>
+        <li>碳水化合物：{{ summary.total_carbs }} g</li>
+        <li>脂肪：{{ summary.total_fat }} g</li>
+      </ul>
     </div>
+    <hr>
+    <canvas id="myChart" ></canvas>
+    {% endif %}
+  </div>
 </div>
 
-
-
 {% if food_zh %}
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">推論結果</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                {{ food_zh }}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-            </div>
-        </div>
+<!-- Modal 推論結果 -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">推論結果</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">{{ food_zh }}</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+      </div>
     </div>
-    {% endif %}
-    <script>
-        {% if food_zh %}
-        window.onload = function () {
-            var myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
-            myModal.show()
+  </div>
+</div>
+<script>
+  window.onload = function () {
+    new bootstrap.Modal(document.getElementById('exampleModal')).show();
+  };
+</script>
+{% endif %}
+
+<!-- 圖片拖拉 / 壓縮上傳邏輯 -->
+<script>
+const dropArea = document.getElementById('drop-area');
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName =>
+  dropArea.addEventListener(eventName, e => e.preventDefault())
+);
+['dragenter', 'dragover'].forEach(eventName =>
+  dropArea.classList.add('highlight')
+);
+['dragleave', 'drop'].forEach(eventName =>
+  dropArea.classList.remove('highlight')
+);
+
+dropArea.addEventListener('drop', e => {
+  const dt = e.dataTransfer;
+  const files = dt.files;
+  handleFiles(files);
+});
+
+function handleFiles(files) {
+  const file = files[0];
+  if (!file || !file.name.match(/\.jpg$/i)) {
+    alert("僅接受 JPG 檔案！");
+    return;
+  }
+
+  const reader = new FileReader();
+  const img = new Image();
+  reader.onload = (e) => {
+    img.onload = () => {
+      const MAX_WIDTH = 480;
+      const scale = MAX_WIDTH / img.width;
+      const width = MAX_WIDTH;
+      const height = img.height * scale;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      const resizedImage = canvas.toDataURL("image/jpeg", 0.8);
+
+      document.getElementById("original").src = resizedImage;
+      document.getElementById("image_src").value = resizedImage;
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// 相機拍照
+document.getElementById('openCameraButton').addEventListener('click', () => {
+  document.getElementById('cameraInput').click();
+});
+document.getElementById('cameraInput').addEventListener('change', (event) => {
+  handleFiles(event.target.files);
+});
+</script>
+
+<!-- 圓餅圖 Chart.js -->
+{% if food_zh %}
+<script>
+const ctx = document.getElementById('myChart').getContext('2d');
+const data = {
+  labels: ['碳水', '蛋白質', '脂肪'],
+  datasets: [{
+    label: '營養成分',
+    data: [{{ summary.total_carbs }}, {{ summary.total_protein }}, {{ summary.total_fat }}], // 若脂肪有值可替換
+    backgroundColor: ['rgb(255, 99, 132)',
+      'rgb(54, 162, 235)',
+      'rgb(255, 205, 86)'],
+    hoverOffset: 4
+  }]
+};
+
+const config = {
+  type: 'doughnut',
+  data: data,
+  options: {
+    responsive: false,
+    maintainAspectRatio: false,
+    cutout: '70%',
+    plugins: {
+      legend: {
+        display: true,
+        position: 'right',
+        labels: {
+          generateLabels: function(chart) {
+            const data = chart.data;
+            return data.labels.map((label, i) => {
+              const value = data.datasets[0].data[i];
+              return {
+                text: `${label}: ${value}g`,
+                fillStyle: data.datasets[0].backgroundColor[i],
+                index: i
+              };
+            });
+          }
         }
-        {% endif %}
-    </script>
+      }
+    }
+  },
+  plugins: [{
+    id: 'centerText',
+    beforeDraw(chart) {
+      const ctx = chart.ctx;
+      const chartArea = chart.chartArea;
+      const centerX = (chartArea.left + chartArea.right) / 2;
+      const centerY = (chartArea.top + chartArea.bottom) / 2;
+      ctx.save();
+      ctx.font = "bold 24px Arial";
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#DA70D6';
+      ctx.fillText('{{ summary.total_calories }}', centerX, centerY);
+      ctx.restore();
+    }
+  }]
+};
 
+new Chart(ctx, config);
+</script>
+{% endif %}
 
-    {% comment %} <button id="openCameraButton">開啟相機拍照</button>
-    <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none;">
-    <img id="previewImage" style="max-width: 100%; margin-top: 20px;"> {% endcomment %}
-
-    <style>
-        #drop-area {
-
-            width: 90%;
-            max-width: 500px;
-            margin: 40px auto;
-            text-align: center;
-
-            transition: border-color 0.3s;
-            box-sizing: border-box;
-        }
-
-        #drop-area.highlight {
-            border-color: green;
-        }
-
-        @media (max-width: 600px) {
-            #drop-area {
-                padding: 20px;
-            }
-
-            #original,
-            #preview {
-                max-width: 100%;
-            }
-        }
-    </style>
-
-    <script>
-        const dropArea = document.getElementById('drop-area');
-
-        // 防止預設事件
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, e => e.preventDefault(), false);
-        });
-
-        // 畫面效果
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'), false);
-        });
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'), false);
-        });
-
-
-
-
-        // 拖拉放下圖片
-        dropArea.addEventListener('drop', e => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            handleFiles(files);
-        });
-
-        function handleFiles(files) {
-            const file = files[0];
-            if (!file) return;
-
-            // 同步 input
-            document.getElementById("image").files = files;
-
-            if (!file.name.match(/\.jpg$/i)) {
-                alert("僅接受 JPG 檔案！");
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const base64Data = e.target.result;
-
-                const original = document.getElementById("original");
-                original.src = base64Data;
-                original.style.display = "block";
-
-                document.getElementById('image_src').value = base64Data;
-            };
-
-            reader.readAsDataURL(file);
-        }
-
-
-     {% comment %} const openCameraButton = document.getElementById('openCameraButton');
-        const cameraInput = document.getElementById('cameraInput');
-        const previewImage = document.getElementById('previewImage');
-
-        openCameraButton.addEventListener('click', () => {
-            // 點擊按鈕時，觸發檔案輸入框的點擊事件
-            cameraInput.click();
-        });
-
-        cameraInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                // 如果使用者拍照並選擇了圖片，則預覽圖片
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    previewImage.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }); {% endcomment %}
-    </script>
-
-
-    
-</body>
-    {% endblock %}
+<!-- RWD 樣式 -->
+<style>
+  #drop-area {
+    width: 90%;
+    max-width: 500px;
+    margin: 40px auto;
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+  #drop-area.highlight {
+    border-color: green;
+  }
+  @media (max-width: 600px) {
+    #drop-area {
+      padding: 20px;
+    }
+    #original, #preview {
+      max-width: 100%;
+    }
+  }
+</style>
+{% endblock %}

@@ -15,12 +15,13 @@ class FoodNutritionResource(resources.ModelResource):
     calories = fields.Field(attribute='calories', column_name='calories')
     protein = fields.Field(attribute='protein', column_name='protein')
     carbs = fields.Field(attribute='carbs', column_name='carbs')
+    fat = fields.Field(attribute='fat', column_name='fat')  
 
     class Meta:
         model = FoodNutrition
         import_id_fields = ('food_name_zh', 'food_name_en')  # 根據中英文名稱作為唯一鍵
         # fields = ('food_name_zh', 'food_name_en', 'calories', 'protein', 'carbs')  # 只匯入這些
-        fields = ('food_name_zh', 'food_name_en', 'calories', 'protein', 'carbs', 'create_user', 'update_user', 'is_recog')
+        fields = ('food_name_zh', 'food_name_en', 'calories', 'protein', 'carbs', 'fat', 'create_user', 'update_user', 'is_recog')
         skip_unchanged = True
         report_skipped = True
 
@@ -41,10 +42,10 @@ class FoodNutritionResource(resources.ModelResource):
 @admin.register(FoodNutrition)
 class FoodNutritionAdmin(ImportExportModelAdmin):
     # 清單頁
-    list_display = ('food_name_en', 'food_name_zh', 'calories', 'protein', 'carbs', 'is_recog', 'create_user', 'create_date', 'update_user', 'update_date')
+    list_display = ('food_name_en', 'food_name_zh', 'calories', 'protein', 'carbs', 'fat', 'is_recog', 'create_user', 'create_date', 'update_user', 'update_date')
     search_fields = ('food_name_en', 'food_name_zh')   
     ordering = ('food_name_en',)  # 按照出版日期排序
-    list_per_page = 50  # 每页显示 25 条记录
+    list_per_page = 50  # 每頁顯示50
     
     resource_class = FoodNutritionResource
     readonly_fields = ('create_user', 'create_date', 'update_date', 'update_user')  # 管理頁面不可編輯
@@ -73,7 +74,7 @@ class FoodNutritionAdmin(ImportExportModelAdmin):
 class RecogLogAdmin(admin.ModelAdmin):
     # 清單頁
     list_display = ('image_name', 'model_type', 'recog_content', 'recog_model_id', 'create_ip', 'create_date')     
-    ordering = ('create_date',)  # 按照出版日期排序
+    ordering = ('-create_date',)  # 按照出版日期排序
     list_per_page = 50  # 每页显示 25 条记录
     
        
@@ -118,7 +119,7 @@ class RecogModelAdmin(admin.ModelAdmin):
     # 清單頁
     list_display = ('model_name', 'model_type', 'model_file', 'update_date')
     search_fields = ('model_name', 'model_type',)
-    ordering = ('update_date',)  # 按照出版日期排序
+    ordering = ('-update_date',)  # 按照出版日期排序
     list_per_page = 50  # 每页显示 25 条记录
     
     readonly_fields = ('model_file','create_user', 'create_date', 'update_date', 'update_user')  # 管理頁面不可編輯

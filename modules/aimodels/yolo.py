@@ -77,6 +77,7 @@ def query_food_infos(food, predictions):
                 "calories": main_food.calories,
                 "protein": main_food.protein,
                 "carbs": main_food.carbs,
+                "fat": main_food.fat,
                 "is_main": True
             })
             seen.add(main_food.food_name_en.lower())
@@ -101,6 +102,7 @@ def query_food_infos(food, predictions):
                     "calories": ingredient.calories,
                     "protein": ingredient.protein,
                     "carbs": ingredient.carbs,
+                    "fat": ingredient.fat,
                     "is_main": False
                 })
             except FoodNutrition.DoesNotExist:
@@ -135,6 +137,7 @@ def sum_nutrition(food_infos):
             "total_calories": sum(i.get("calories", 0) or 0 for i in items_to_sum),
             "total_protein": sum(i.get("protein", 0) or 0 for i in items_to_sum),
             "total_carbs": sum(i.get("carbs", 0) or 0 for i in items_to_sum),
+            "total_fat": sum(i.get("fat", 0) or 0 for i in items_to_sum),
             "source": source,
             "item_count": len(items_to_sum)
         }
@@ -144,6 +147,7 @@ def sum_nutrition(food_infos):
             "total_calories": 0,
             "total_protein": 0,
             "total_carbs": 0,
+            "total_fat": 0,
             "source": "錯誤",
             "item_count": 0
         }

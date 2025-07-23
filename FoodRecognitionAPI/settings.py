@@ -141,5 +141,5 @@ LINE_CHANNEL_TOKEN = "AJyf973jpZP4OqtIqLzygOBDbiyTljW3eV5FJlkZXRpYbhqAjvDqjwvRxq
 
 # 問題排除ngrok 網址不在 Django 的受信任來源清單中
 # CSRF_TRUSTED_ORIGINS = [
-#     "https://8df0b47a2b6e.ngrok-free.app"
+#     "https://b40de9225a8b.ngrok-free.app"
 # ]
