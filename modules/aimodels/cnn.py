@@ -8,6 +8,18 @@ img_size = 224
 # classes = np.array(['beef_noodles', 'bubble_tea', 'curry_rice', 'donut', 'other', 'steak'])
 # classes = np.array(['beef noodles', 'bubble_tea', 'curry_rice', 'donut', 'non_food', 'other_food', 'steak'])
 
+classes = np.array([
+    "beef noodles", "bubble_tea", "curry_rice", "donut",
+    "non_food", "other_food_fried_rice", "other_food_hambuger",
+    "other_food_noodle", "other_food_pizza",
+    "other_food_stinky_tofu", "steak"
+])
+
+RabaClasses = np.array(['beef noodles', 'bubble_tea', 'curry_rice',
+                        'donut', 'freid noodles', 'fried rice',
+                        'hamburger', 'other', 'pizza', 'ramen',
+                        'steak', 'stinky tofu'])
+
 def classifyFood(food_img, model1):
     
     items = model1.recog_items
@@ -23,26 +35,17 @@ def classifyFood(food_img, model1):
 
     pred = model.predict(img)
 
-    confidence = np.max(pred)
-    predicted_class = np.argmax(pred)
-    
-    if predicted_class < len(classes):
-        result = classes[np.argmax(pred)] 
-    else:
-        result = 'other_food'
-   
+    result = classes[np.argmax(pred)]
 
-    if result in ['non_food', 'other_food']:
+    if result not in ['beef noodles', 'bubble_tea', 'curry_rice', 'donut', 'steak']:
         return "不在判別的五種食物中"
-    else:
-        return result
-
-    # if confidence < 0.5:
-    #     return f"模型不太確定這張圖片的內容，最高信心值為：{confidence:.2f}"
-    # else:
-    #     return f"預測為類別 {classes[predicted_class]}，信心值為：{confidence:.2f}"
     
-    # print("預測結果：", classes[np.argmax(pred)])
-    # return classes[np.argmax(pred)]
+    return result
 
-# print(classifyFood('sss'))
+    '''
+    confidence = np.max(pred)
+    if confidence < 0.5:
+        return f"模型不太確定這張圖片的內容，最高信心值為：{confidence:.2f}"
+    else:
+        return f"預測為類別 {result}，信心值為：{confidence:.2f}"
+    '''
