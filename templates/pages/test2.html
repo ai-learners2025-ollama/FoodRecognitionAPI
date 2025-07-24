@@ -6,7 +6,7 @@
   <form method="post" enctype="multipart/form-data" id="upload-form">
     {% csrf_token %}
     <label for="image" style="cursor: pointer; display: block; border: 3px dashed #aaa; border-radius: 10px;">
-      <input type="file" id="image" name="image" accept="image/jpeg" onchange="handleFiles(this.files)" style="display:none;">
+      <input type="file" id="image" name="image" accept="image/jpg" onchange="handleFiles(this.files)" style="display:none;">
       <img id="original" src="{{ image_url|default:'/static/images/file_upload.jpg' }}" style="width: 100%; border: 1px solid #ccc; border-radius: 8px;" />
       <input type="hidden" name="image_src" id="image_src" value="{{ image_url }}">
     </label>
@@ -115,7 +115,7 @@ function handleFiles(files) {
       canvas.width = width;
       canvas.height = height;
       canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-      const resizedImage = canvas.toDataURL("image/jpeg", 0.8);
+      const resizedImage = canvas.toDataURL("image/jpg", 0.8);
 
       document.getElementById("original").src = resizedImage;
       document.getElementById("image_src").value = resizedImage;

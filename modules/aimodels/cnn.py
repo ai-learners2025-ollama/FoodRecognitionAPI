@@ -25,8 +25,12 @@ def classifyFood(food_img, model1):
 
     confidence = np.max(pred)
     predicted_class = np.argmax(pred)
-
-    result = classes[np.argmax(pred)]
+    
+    if predicted_class < len(classes):
+        result = classes[np.argmax(pred)] 
+    else:
+        result = 'other_food'
+   
 
     if result in ['non_food', 'other_food']:
         return "不在判別的五種食物中"

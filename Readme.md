@@ -97,3 +97,13 @@ python manage.py migrate
 # 建立超級使用者
 python manage.py createsuperuser
 ```
+
+### ngrok
+```shell
+https://dashboard.ngrok.com/
+登入後下載 ngrok.exe 放桌面
+開啟 CMD → cd Desktop
+ngrok config add-authtoken xxxxxxxx (從 dashboard 複製)
+ngrok http http://127.0.0.1:8000
+python manage.py runserver 0.0.0.0:8000
+```

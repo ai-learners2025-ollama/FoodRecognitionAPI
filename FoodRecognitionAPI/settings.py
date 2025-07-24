@@ -140,6 +140,6 @@ LINE_CHANNEL_SECRET = "64ddd310b12d8e4d68358dd8af1a8b70"
 LINE_CHANNEL_TOKEN = "AJyf973jpZP4OqtIqLzygOBDbiyTljW3eV5FJlkZXRpYbhqAjvDqjwvRxq619yCaQu/A4vSyOUo/pnJGVKZrB8FdDBfXWJpe+Mno86NCsh8OOpB6FRrsq4LXpeGFre4OEqNemQOtkjtgAOzUvE+HuQdB04t89/1O/w1cDnyilFU="
 
 # 問題排除ngrok 網址不在 Django 的受信任來源清單中
-# CSRF_TRUSTED_ORIGINS = [
-#     "https://b40de9225a8b.ngrok-free.app"
-# ]
+CSRF_TRUSTED_ORIGINS = [
+    "https://foodai.learnai2025.info"
+]

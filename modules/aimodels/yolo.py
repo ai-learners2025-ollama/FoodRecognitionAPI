@@ -32,7 +32,8 @@ def detect_image(filename, original_path, model_file2):
             exist_ok=True
         )
 
-        # 結果圖片儲存路徑
+        # 結果圖片儲存路徑        
+        filename = f"{os.path.splitext(filename)[0]}.jpg"
         relative_path = os.path.join(settings.MEDIA_IMAGE_URL, date_str, 'predict', filename).replace('\\', '/')
 
         # 整理辨識結果

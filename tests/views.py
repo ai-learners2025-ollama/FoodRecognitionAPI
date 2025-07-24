@@ -53,7 +53,8 @@ def test2(request):
             filename, original_path, relative_path = image_utils.uploaded_base64_image(image_src)
 
             img = Image.open(original_path)
-
+            img = img.convert('RGB')  #  RGB 格式
+            
             # 取食物模型
             model1 = models_utils.get_enabled_model(1)
 
