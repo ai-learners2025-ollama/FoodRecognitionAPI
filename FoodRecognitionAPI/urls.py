@@ -16,16 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from tests.views import test,test2
+from tests.views import test,test2,index,home
 from line_bot.views import callback
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', test2),
+    path('', home),
     path('line/', callback),
     path('test/', test),
+    path('test2/', test2),
+    path('index', index),
 ]
 
 if settings.DEBUG:

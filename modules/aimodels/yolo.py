@@ -139,6 +139,10 @@ def sum_nutrition(food_infos):
             "total_protein": sum(i.get("protein", 0) or 0 for i in items_to_sum),
             "total_carbs": sum(i.get("carbs", 0) or 0 for i in items_to_sum),
             "total_fat": sum(i.get("fat", 0) or 0 for i in items_to_sum),
+            "total_calories_pct": round((sum(i.get("calories", 0) or 0 for i in items_to_sum) / 2500) * 100),
+            "total_protein_pct": round((sum(i.get("protein", 0) or 0 for i in items_to_sum) / 75) * 100),
+            "total_carbs_pct": round((sum(i.get("carbs", 0) or 0 for i in items_to_sum) / 325) * 100),
+            "total_fat_pct": round((sum(i.get("fat", 0) or 0 for i in items_to_sum) / 77) * 100),
             "source": source,
             "item_count": len(items_to_sum)
         }
@@ -149,7 +153,18 @@ def sum_nutrition(food_infos):
             "total_protein": 0,
             "total_carbs": 0,
             "total_fat": 0,
+            "total_calories_pct": 0,
+            "total_protein_pct": 0,
+            "total_carbs_pct": 0,
+            "total_fat_pct": 0,
             "source": "錯誤",
             "item_count": 0
         }
 
+
+# | 項目           | 建議攝取量（每日）                    
+# | ---------     | ---------------------------- 
+# | **熱量**       | 男性：2500 kcal
+# | **碳水化合物** |  325g（約每 1g 提供 4 kcal）   
+# | **脂肪**       | 77g（約每 1g 提供 9 kcal）    
+# | **蛋白質**     | 75g（約每 1g 提供 4 kcal）     
