@@ -108,7 +108,7 @@ def callback(request):
                             recog_content=predictions
                         )
 
-                        food_inside = "".join([food.get('name_zh') or food.get('name_en') for food in food_infos] + " ")
+                        food_inside = " ".join([food.get('name_zh') or food.get('name_en') for food in food_infos])
                     
                         res_message = f"辨識食物: {food_zh} \n " + \
                                       f"食材: {food_inside} \n" + \
