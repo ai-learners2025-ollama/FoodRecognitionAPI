@@ -129,7 +129,7 @@ def callback(request):
                         scheme = request.headers.get('X-Forwarded-Proto') or \
                                  ("https" if request.is_secure() else "http")
                         yolo_pred_img_url = f'{scheme}://{request.get_host()}{path}'
-                        print(yolo_pred_img_url)
+                        # print(yolo_pred_img_url)
                         # 添加圖片訊息
                         messages_to_send.append(
                             ImageSendMessage(
