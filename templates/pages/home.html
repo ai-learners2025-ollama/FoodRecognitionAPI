@@ -1,67 +1,72 @@
-{% extends "scaffolds/base.html" %}
-{% block content %}
+{% extends "scaffolds/base.html" %} {% block content %}
 <div class="container" id="cameraTrigger">
-    <form method="post" enctype="multipart/form-data" id="upload-form">
-        {% csrf_token %}
-        <input type="hidden" name="image_src" id="image_src" value="{{ image_url }}">
-    </form>
-    
-    <canvas id="mycanvas" style="display: none;"></canvas>
-    <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none;">
+  <form method="post" enctype="multipart/form-data" id="upload-form">
+    {% csrf_token %}
+    <input
+      type="hidden"
+      name="image_src"
+      id="image_src"
+      value="{{ image_url }}"
+    />
+  </form>
+
+  <canvas id="mycanvas" style="display: none"></canvas>
+  <input
+    type="file"
+    accept="image/*"
+    capture="environment"
+    id="cameraInput"
+    style="display: none"
+  />
 </div>
+
 <script>
+  document.getElementById("cameraTrigger").addEventListener("click", () => {
+    document.getElementById("cameraInput").click();
+  });
 
-    document.getElementById('cameraTrigger').addEventListener('click', () => {
-        document.getElementById('cameraInput').click();
-    });
+  document.getElementById("cameraInput").addEventListener("change", (event) => {
+    handleFiles(event.target.files);
+  });
 
-    document.getElementById('cameraInput').addEventListener('change', (event) => {
-
-        handleFiles(event.target.files);
-    });
-
-    function handleFiles(files) {
-
-        const file = files[0];
-        if (!file || !file.name.match(/\.jpg$/i)) {
-            alert("僅接受 JPG 檔案！");
-            return;
-        }
-
-        const reader = new FileReader();
-        const img = new Image();
-        reader.onload = (e) => {
-            img.onload = () => {
-                const MAX_WIDTH = 480;
-                const scale = MAX_WIDTH / img.width;
-                const width = MAX_WIDTH;
-                const height = img.height * scale;
-
-                const canvas = document.getElementById('mycanvas');
-                canvas.width = width;
-                canvas.height = height;
-                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                const resizedImage = canvas.toDataURL("image/jpg", 0.8);
-                document.getElementById("image_src").value = resizedImage;
-                document.getElementById("upload-form").submit();
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
+  function handleFiles(files) {
+    const file = files[0];
+    if (!file || !file.name.match(/\.jpg$/i)) {
+      alert("僅接受 JPG 檔案！");
+      return;
     }
+
+    document.getElementById("loading-overlay").style.display = "flex";
+    const reader = new FileReader();
+    const img = new Image();
+    reader.onload = (e) => {
+      img.onload = () => {
+        const MAX_WIDTH = 480;
+        const scale = MAX_WIDTH / img.width;
+        const width = MAX_WIDTH;
+        const height = img.height * scale;
+
+        const canvas = document.getElementById("mycanvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        const resizedImage = canvas.toDataURL("image/jpg", 0.8);
+        document.getElementById("image_src").value = resizedImage;
+        document.getElementById("upload-form").submit();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
 </script>
 <style>
-    .container {
-
-
+      .container {
+        max-width: 414px;
+        margin: 0px auto;
         height: 100vh;
-        /* 讓容器至少佔滿整個螢幕高度 */
-        background-image: url('static/images/home.png');
-        /* 換成你自己的圖片路徑 */
-        background-size: cover;
+        background-image: url(static/images/home.png);
+        background-size: 100%;
         background-position: center;
-        background-repeat: no-repeat;
-    }
+      }
 </style>
-
 {% endblock %}

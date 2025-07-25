@@ -1,291 +1,5 @@
 {% extends "scaffolds/base.html" %}
 {% block content %}
-<div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <span class="app-name">YummiCanAI</span>
-            </div>
-            <div class="header-right">
-                <button class="chart-btn">📊</button>
-                <div class="streak-counter">
-                    <span class="flame-icon">🔥</span>
-                    <span class="streak-number">15</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab Navigation -->
-        <div class="tab-navigation">
-            <div class="tab-container">
-                <button class="tab-button active" data-tab="today">Today</button>
-                <button class="tab-button" data-tab="yesterday">Yesterday</button>
-            </div>
-        </div>
-
-        <!-- Calorie Counter -->
-        <div class="calorie-counter">
-            <div class="calorie-info">
-                <div class="calorie-number">{{ summary.total_calories }}</div>
-                <div class="calorie-label">Calories</div>
-            </div>
-            <div class="circular-progress">
-                <svg class="progress-ring" width="120" height="120">
-                    <circle class="progress-bg" cx="60" cy="60" r="50"></circle>
-                    <circle class="progress-fill" cx="60" cy="60" r="50" id="calorie-progress" data-progress="{{ summary.total_calories_pct }}"></circle>
-                </svg>
-                <div class="progress-center">🔥</div>
-            </div>
-        </div>
-
-        <!-- Macro Nutrients -->
-        <div class="macro-nutrients">
-            <div class="macro-item">
-                <div class="macro-progress">
-                    <svg class="progress-ring" width="80" height="80">
-                        <circle class="progress-bg" cx="40" cy="40" r="35"></circle>
-                        <circle class="progress-fill protein-stroke" cx="40" cy="40" r="35" data-progress="{{ summary.total_protein_pct }}"></circle>
-                    </svg>
-                    <div class="macro-center protein-color"></div>
-                </div>
-                <div class="macro-value">{{ summary.total_protein }} g</div>
-                <div class="macro-label">Protein</div>
-            </div>
-            
-            <div class="macro-item">
-                <div class="macro-progress">
-                    <svg class="progress-ring" width="80" height="80">
-                        <circle class="progress-bg" cx="40" cy="40" r="35"></circle>
-                        <circle class="progress-fill carbs-stroke" cx="40" cy="40" r="35" data-progress="{{ summary.total_carbs_pct }}"></circle>
-                    </svg>
-                    <div class="macro-center carbs-color"></div>
-                </div>
-                <div class="macro-value">{{ summary.total_carbs }} g</div>
-                <div class="macro-label">Carbs</div>
-            </div>
-            
-            <div class="macro-item">
-                <div class="macro-progress">
-                    <svg class="progress-ring" width="80" height="80">
-                        <circle class="progress-bg" cx="40" cy="40" r="35"></circle>
-                        <circle class="progress-fill fats-stroke" cx="40" cy="40" r="35" data-progress="{{ summary.total_fat_pct }}"></circle>
-                    </svg>
-                    <div class="macro-center fats-color"></div>
-                </div>
-                <div class="macro-value">{{ summary.total_fat }} g</div>
-                <div class="macro-label">Fats</div>
-            </div>
-        </div>
-
-        <!-- Recently Uploaded -->
-        {% if food_zh %}
-        <div class="recently-uploaded">
-            <h3 class="section-title">Recently uploaded</h3>
-            <div class="food-item">
-                <div class="food-image">
-                    {% if image_url %}
-                        <img class="food-image" id="original" src="{{ image_url }}"  />
-                    {% endif %}
-                </div>
-                <div class="food-details">
-                    <div class="food-header">
-                        <div class="food-name">
-                            {{ food_zh }}
-                            
-                        </div>
-                        <div class="food-time">
-                            {% for food in food_infos %}                
-                               {{ food.name_zh|default:food.name_en }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="food-calories">
-                        <span>🔥</span>
-                        <span>{{ summary.total_calories }} kcal</span>
-                    </div>
-            
-                    <div class="food-macros">
-                        <div class="macro-indicator">
-                            <div class="macro-dot protein-color"></div>
-                            <span>{{ summary.total_protein }} g</span>
-                        </div>
-                        <div class="macro-indicator">
-                            <div class="macro-dot carbs-color"></div>
-                            <span>{{ summary.total_carbs }} g</span>
-                        </div>
-                        <div class="macro-indicator">
-                            <div class="macro-dot fats-color"></div>
-                            <span>{{ summary.total_fat }} g</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <form method="post" enctype="multipart/form-data" id="upload-form">
-            {% csrf_token %}
-            <input type="hidden" name="image_src" id="image_src" value="{{ image_url }}">
-        </form>
-            
-            <!-- Bottom Navigation -->
-            <div class="bottom-nav">
-                    
-                <button class="nav-item" id="Analytics">
-                    <div class="nav-icon" >📊</div>
-                    <!-- <div class="nav-label">Analytics</div> -->
-                </button>
-                <button class="nav-item" id="openCameraButton"><div class="nav-icon">📷</div></button>
-                <button class="nav-item" id="add-button"><div class="nav-icon">🖼️</div></button>
-            </div>
-           
-            
-        
-        <canvas id="mycanvas" style="display: none;" ></canvas>
-        <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none;">
-    </div>
-
-    <script>
-        // Initialize circular progress animations
-        function initializeProgress() {
-            // Main calorie progress (0% for demonstration)
-            const calorieProgress = document.getElementById('calorie-progress');
-            const caloriePercentage = 0; // 0% consumed
-            const calorieOffset = 314 - (caloriePercentage / 100) * 314;
-            calorieProgress.style.strokeDashoffset = calorieOffset;
-
-            // Macro progress circles
-            const macroCircles = document.querySelectorAll('.macro-progress .progress-fill');
-            macroCircles.forEach(circle => {
-                const percentage = parseInt(circle.getAttribute('data-progress'));
-                const circumference = 220; // 2 * π * 35
-                const offset = circumference - (percentage / 100) * circumference;
-                circle.style.strokeDashoffset = offset;
-            });
-        }
-
-        // Tab switching functionality
-        function initializeTabs() {
-            const tabButtons = document.querySelectorAll('.tab-button');
-            
-            tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    // Remove active class from all tabs
-                    tabButtons.forEach(tab => tab.classList.remove('active'));
-                    // Add active class to clicked tab
-                    button.classList.add('active');
-                });
-            });
-        }
-
-        // Bottom navigation functionality
-        function initializeNavigation() {
-            const navItems = document.querySelectorAll('.nav-item');
-            const fabButton = document.getElementById('add-button');
-            const fabOpenCameraButton = document.getElementById('openCameraButton');
-            
-            navItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    // Remove active class from all nav items
-                    navItems.forEach(nav => nav.classList.remove('active'));
-                    // Add active class to clicked item
-                    item.classList.add('active');
-                });
-            });
-
-            // FAB button click handler
-            fabButton.addEventListener('click', () => {
-                alert('Add new food item functionality would be implemented here!');
-            });
-
-            fabOpenCameraButton.addEventListener('click', () => {
-                document.getElementById('cameraInput').click();
-            });
-
-            document.getElementById('cameraInput').addEventListener('change', (event) => {
-               
-                handleFiles(event.target.files);
-            });
-        }
-
-        // Simulate data updates
-        function simulateDataUpdate() {
-            const calorieNumber = document.querySelector('.calorie-number');
-            let currentCalories = 2500;
-            
-            // Simulate consuming calories over time
-            setInterval(() => {
-                if (currentCalories > 1800) {
-                    currentCalories -= Math.floor(Math.random() * 50) + 10;
-                    calorieNumber.textContent = currentCalories;
-                    
-                    //Update progress ring
-                    const consumedPercentage = ((2500 - currentCalories) / 2500) * 100;
-                    const calorieProgress = document.getElementById('calorie-progress');
-                    const offset = 314 - (consumedPercentage / 100) * 314;
-                    calorieProgress.style.strokeDashoffset = offset;
-                }
-            }, 5000); // Update every 5 seconds
-        }
-
-        // Initialize all functionality when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeProgress();
-            initializeTabs();
-            initializeNavigation();
-            //simulateDataUpdate();
-        });
-
-        // Add some interactive animations
-        document.addEventListener('DOMContentLoaded', () => {
-            const macroItems = document.querySelectorAll('.macro-item');
-            
-            macroItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    item.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        item.style.transform = 'scale(1)';
-                    }, 150);
-                });
-            });
-
-            // Add transition styles
-            macroItems.forEach(item => {
-                item.style.transition = 'transform 0.15s ease';
-            });
-        });
-
-        function handleFiles(files) {
-            
-            const file = files[0];
-            if (!file || !file.name.match(/\.jpg$/i)) {
-                alert("僅接受 JPG 檔案！");
-                return;
-            }
-
-            const reader = new FileReader();
-            const img = new Image();
-            reader.onload = (e) => {
-                img.onload = () => {
-                    const MAX_WIDTH = 480;
-                    const scale = MAX_WIDTH / img.width;
-                    const width = MAX_WIDTH;
-                    const height = img.height * scale;
-
-                    const canvas = document.getElementById('mycanvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                    const resizedImage = canvas.toDataURL("image/jpg", 0.8);
-                    document.getElementById("image_src").value = resizedImage;
-                    document.getElementById("upload-form").submit();
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    </script>
-
 <style>
         * {
             margin: 0;
@@ -336,7 +50,7 @@
         }
 
         .app-name {
-            font-size: 18px;
+            font-size: 25px;
             font-weight: 500;
         }
 
@@ -687,4 +401,293 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
     </style>
+<div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <span class="app-name">YummiCanAI</span>
+            </div>
+            <div class="header-right">
+                
+                <div class="streak-counter">
+                    <span class="flame-icon"><img rel="icon" type="image/png" style="width: 20px;" src="static/images/trending-topic.png"></span>
+                    <span class="streak-number"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <div class="tab-container">
+                <button class="tab-button active" data-tab="today">今天</button>
+                <button class="tab-button" data-tab="yesterday">昨天</button>
+            </div>
+        </div>
+
+        <!-- Calorie Counter -->
+        <div class="calorie-counter">
+            <div class="calorie-info">
+                <div class="calorie-number">{{ summary.total_calories }}</div>
+                <div class="calorie-label">熱量</div>
+            </div>
+            <div class="circular-progress">
+                <svg class="progress-ring" width="120" height="120">
+                    <circle class="progress-bg" cx="60" cy="60" r="50"></circle>
+                    <circle class="progress-fill" cx="60" cy="60" r="50" id="calorie-progress" data-progress="{{ summary.total_calories_pct }}"></circle>
+                </svg>
+                <div class="progress-center">🔥</div>
+            </div>
+        </div>
+
+        <!-- Macro Nutrients -->
+        <div class="macro-nutrients">
+            <div class="macro-item">
+                <div class="macro-progress">
+                    <svg class="progress-ring" width="80" height="80">
+                        <circle class="progress-bg" cx="40" cy="40" r="35"></circle>
+                        <circle class="progress-fill protein-stroke" cx="40" cy="40" r="35" data-progress="{{ summary.total_protein_pct }}"></circle>
+                    </svg>
+                    <div class="macro-center protein-color"></div>
+                </div>
+                <div class="macro-value">{{ summary.total_protein }} g</div>
+                <div class="macro-label">蛋白質</div>
+            </div>
+            
+            <div class="macro-item">
+                <div class="macro-progress">
+                    <svg class="progress-ring" width="80" height="80">
+                        <circle class="progress-bg" cx="40" cy="40" r="35"></circle>
+                        <circle class="progress-fill carbs-stroke" cx="40" cy="40" r="35" data-progress="{{ summary.total_carbs_pct }}"></circle>
+                    </svg>
+                    <div class="macro-center carbs-color"></div>
+                </div>
+                <div class="macro-value">{{ summary.total_carbs }} g</div>
+                <div class="macro-label">碳水</div>
+            </div>
+            
+            <div class="macro-item">
+                <div class="macro-progress">
+                    <svg class="progress-ring" width="80" height="80">
+                        <circle class="progress-bg" cx="40" cy="40" r="35"></circle>
+                        <circle class="progress-fill fats-stroke" cx="40" cy="40" r="35" data-progress="{{ summary.total_fat_pct }}"></circle>
+                    </svg>
+                    <div class="macro-center fats-color"></div>
+                </div>
+                <div class="macro-value">{{ summary.total_fat }} g</div>
+                <div class="macro-label">脂肪</div>
+            </div>
+        </div>
+
+        <!-- Recently Uploaded -->
+        {% if food_zh %}
+        <div class="recently-uploaded">
+            <h3 class="section-title">最近更新</h3>
+            <div class="food-item">
+                <div class="food-image">
+                    {% if image_url %}
+                        <img class="food-image" id="original" src="{{ image_url }}"  />
+                    {% endif %}
+                </div>
+                <div class="food-details">
+                    <div class="food-header">
+                        <div class="food-name">
+                            {{ food_zh }}
+                            
+                        </div>
+                        <div class="food-time">
+                            {% for food in food_infos %}                
+                               {{ food.name_zh|default:food.name_en }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="food-calories">
+                        <span>🔥</span>
+                        <span>{{ summary.total_calories }} kcal</span>
+                    </div>
+            
+                    <div class="food-macros">
+                        <div class="macro-indicator">
+                            <div class="macro-dot protein-color"></div>
+                            <span>{{ summary.total_protein }} g</span>
+                        </div>
+                        <div class="macro-indicator">
+                            <div class="macro-dot carbs-color"></div>
+                            <span>{{ summary.total_carbs }} g</span>
+                        </div>
+                        <div class="macro-indicator">
+                            <div class="macro-dot fats-color"></div>
+                            <span>{{ summary.total_fat }} g</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" id="upload-form">
+            {% csrf_token %}
+            <input type="hidden" name="image_src" id="image_src" value="{{ image_url }}">
+        </form>
+            
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                    
+                <button class="nav-item" id="Analytics">
+                    <img rel="icon" type="image/png" style="width: 49px;" src="static/images/interface.png">
+                </button>
+                <button class="nav-item" id="openCameraButton"><img rel="icon" type="image/png" style="width: 49px;" src="static/images/camera.png"></button>
+                <button class="nav-item" id="add-button"><img rel="icon" type="image/png" style="width: 49px;" src="static/images/photo.png"></button>
+            </div>
+           
+            
+        
+        <canvas id="mycanvas" style="display: none;" ></canvas>
+        <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none;">
+    </div>
+
+    <script>
+        // Initialize circular progress animations
+        function initializeProgress() {
+            // Main calorie progress (0% for demonstration)
+            const calorieProgress = document.getElementById('calorie-progress');
+            const caloriePercentage = 0; // 0% consumed
+            const calorieOffset = 314 - (caloriePercentage / 100) * 314;
+            calorieProgress.style.strokeDashoffset = calorieOffset;
+
+            // Macro progress circles
+            const macroCircles = document.querySelectorAll('.macro-progress .progress-fill');
+            macroCircles.forEach(circle => {
+                const percentage = parseInt(circle.getAttribute('data-progress'));
+                const circumference = 220; // 2 * π * 35
+                const offset = circumference - (percentage / 100) * circumference;
+                circle.style.strokeDashoffset = offset;
+            });
+        }
+
+        // Tab switching functionality
+        function initializeTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all tabs
+                    tabButtons.forEach(tab => tab.classList.remove('active'));
+                    // Add active class to clicked tab
+                    button.classList.add('active');
+                });
+            });
+        }
+
+        // Bottom navigation functionality
+        function initializeNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const fabButton = document.getElementById('add-button');
+            const fabOpenCameraButton = document.getElementById('openCameraButton');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    // Remove active class from all nav items
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    // Add active class to clicked item
+                    item.classList.add('active');
+                });
+            });
+
+            // FAB button click handler
+            fabButton.addEventListener('click', () => {
+                alert('YummiCanAI 不開放使用!');
+            });
+
+            document.getElementById('Analytics').addEventListener('click', () => {               
+                 alert('YummiCanAI 不開放使用!');
+            });
+
+            fabOpenCameraButton.addEventListener('click', () => {
+                document.getElementById('cameraInput').click();
+            });
+
+            document.getElementById('cameraInput').addEventListener('change', (event) => {               
+                handleFiles(event.target.files);
+            });
+        }
+
+        // Simulate data updates
+        function simulateDataUpdate() {
+            const calorieNumber = document.querySelector('.calorie-number');
+            let currentCalories = 2500;
+            
+            // Simulate consuming calories over time
+            setInterval(() => {
+                if (currentCalories > 1800) {
+                    currentCalories -= Math.floor(Math.random() * 50) + 10;
+                    calorieNumber.textContent = currentCalories;
+                    
+                    //Update progress ring
+                    const consumedPercentage = ((2500 - currentCalories) / 2500) * 100;
+                    const calorieProgress = document.getElementById('calorie-progress');
+                    const offset = 314 - (consumedPercentage / 100) * 314;
+                    calorieProgress.style.strokeDashoffset = offset;
+                }
+            }, 5000); // Update every 5 seconds
+        }
+
+        // Initialize all functionality when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeProgress();
+            initializeTabs();
+            initializeNavigation();
+            //simulateDataUpdate();
+        });
+
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', () => {
+            const macroItems = document.querySelectorAll('.macro-item');
+            
+            macroItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    item.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        item.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            });
+
+            // Add transition styles
+            macroItems.forEach(item => {
+                item.style.transition = 'transform 0.15s ease';
+            });
+        });
+
+        function handleFiles(files) {
+            
+            const file = files[0];
+            if (!file || !file.name.match(/\.jpg$/i)) {
+                alert("僅接受 JPG 檔案！");
+                return;
+            }
+            document.getElementById("loading-overlay").style.display = "flex";
+            const reader = new FileReader();
+            const img = new Image();
+            reader.onload = (e) => {
+                img.onload = () => {
+                    const MAX_WIDTH = 480;
+                    const scale = MAX_WIDTH / img.width;
+                    const width = MAX_WIDTH;
+                    const height = img.height * scale;
+
+                    const canvas = document.getElementById('mycanvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    const resizedImage = canvas.toDataURL("image/jpg", 0.8);
+                    document.getElementById("image_src").value = resizedImage;
+                    document.getElementById("upload-form").submit();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+
+
 {% endblock %}

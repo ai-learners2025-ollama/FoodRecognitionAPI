@@ -37,7 +37,7 @@ def classifyFood(food_img, model1):
 
     result = classes[np.argmax(pred)]
 
-    if result not in ['beef noodles', 'bubble_tea', 'curry_rice', 'donut', 'steak']:
+    if result not in ['beef noodles', 'Bubble Milk Tea', 'Curry Rice', 'donut', 'steak']:
         return "不在判別的五種食物中"
     
     return result

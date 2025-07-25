@@ -1,8 +1,52 @@
 <html>
-    {% include "components/header.html" %}
-<body>
-    {% block content %} {% endblock %}
-    
-    {% include "components/footer.html" %}
-</body>
+  {% include "components/header.html" %}
+  <body>
+    {% block content %} {% endblock %} {% include "components/footer.html" %}
+
+    <div id="loading-overlay" style="display: none">
+      <div class="logo-spinner">🍎</div>
+      <div class="loading-text">YummiCanAI 載入中...</div>
+    </div>
+
+    <style>
+
+
+      #loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.85);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: "Segoe UI", sans-serif;
+      }
+
+      .logo-spinner {
+        font-size: 48px;
+        animation: spin 1s linear infinite;
+      }
+
+      .loading-text {
+        margin-top: 16px;
+        font-size: 18px;
+        color: #374151;
+        font-weight: 500;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </body>
 </html>
