@@ -114,7 +114,7 @@ def test2(request):
        
 
 def index(request):
-    # try:
+    try:
        if request.method == 'GET':
             return render(request, 'pages/index.html')
        else: 
@@ -187,12 +187,12 @@ def index(request):
                     'summary': summary,         # 總營養
                     'image_url': image_src      # 傳給前端顯示圖片
                 })
-    # except Exception as e:
-        # return render(request, 'pages/test2.html',{"result":"請先上傳圖片"})
+    except Exception as e:
+        return render(request, 'pages/index.html',{"result":"請重新操作"})
        
 
 def home(request):
-    # try:
+    try:
        if request.method == 'GET':
             return render(request, 'pages/home.html')
        else: 
@@ -265,8 +265,8 @@ def home(request):
                     'summary': summary,         # 總營養
                     'image_url': image_src      # 傳給前端顯示圖片
                 })
-    # except Exception as e:
-        # return render(request, 'pages/test2.html',{"result":"請先上傳圖片"})
+    except Exception as e:
+        return render(request, 'pages/test2.html',{"result":"請重新操作"})
        
       
         
